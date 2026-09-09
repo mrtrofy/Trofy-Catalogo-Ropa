@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moda & Íntima | Catálogo de Ropa y Ropa Interior</title>
+
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<!-- FontAwesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    brand: {
+                        50: '#fdf2f8',
+                        100: '#fce7f3',
+                        200: '#fbcfe8',
+                        300: '#f9a8d4',
+                        400: '#f472b6',
+                        500: '#ec4899',
+                        600: '#db2777',
+                        700: '#be185d',
+                        800: '#9d174d',
+                        900: '#831843',
+                    }
+                },
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                    serif: ['Playfair Display', 'serif'],
+                }
+            }
+        }
+    }
+</script>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f8fafc;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #f9a8d4;
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #db2777;
+    }
+</style>
+
+
+<!-- Header Administrador -->
+<header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center text-white text-lg">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+            <div>
+                <h1 class="font-serif font-bold text-lg leading-none">Moda & Íntima</h1>
+                <span class="text-[10px] text-pink-400 font-medium tracking-wider uppercase">Panel de Control Admin</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <a href="index.html" class="inline-flex items-center space-x-2 text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 hover:text-white transition">
+                <i class="fa-solid fa-store text-brand-400"></i>
+                <span>Ver Catálogo Principal</span>
+            </a>
+
+            <button id="logoutBtn" onclick="handleLogout()" class="hidden text-xs bg-pink-900/50 hover:bg-pink-800 text-pink-200 border border-pink-700 px-3 py-1.5 rounded-lg transition items-center space-x-1">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Salir</span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Pantalla de Inicio de Sesión / Autenticación -->
+<div id="loginSection" class="flex-grow flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-xl border border-slate-200">
+        <div class="text-center mb-6">
+            <div class="w-14 h-14 bg-pink-100 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl shadow-inner">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="font-serif text-2xl font-bold text-slate-900">Acceso Privado</h2>
+            <p class="text-xs text-slate-500 mt-1">Ingresa la clave para administrar los productos del catálogo</p>
+        </div>
+
+        <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">Contraseña de Administrador</label>
+                <div class="relative">
+                    <input type="password" id="adminPasswordInput" placeholder="Clave: admin123" class="w-full text-sm p-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition">
+                    <i class="fa-solid fa-key absolute right-3.5 top-3.5 text-slate-400"></i>
+                </div>
+                <p id="loginError" class="text-xs text-pink-600 font-medium mt-2 hidden flex items-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Contraseña incorrecta. Inténtalo de nuevo.</span>
+                </p>
+            </div>
+
+            <button type="submit" class="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md transition active:scale-[0.99]">
+                Iniciar Sesión
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Panel Dashboard Principal (Solo visible post-login) -->
+<main id="adminDashboard" class="hidden flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Header Actions -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs">
+        <div>
+            <h2 class="text-xl font-bold font-serif text-slate-900">Gestor de Productos y Lencería</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Los cambios guardados se reflejarán instantáneamente en la tienda principal.</p>
+        </div>
+
+        <button onclick="requestResetCatalog()" class="text-xs font-semibold bg-pink-50 hover:bg-pink-100 text-brand-700 border border-pink-200 px-3.5 py-2 rounded-xl transition flex items-center space-x-1.5 shadow-2xs">
+            <i class="fa-solid fa-rotate-left text-brand-600"></i>
+            <span>Restaurar Catálogo Demo</span>
+        </button>
+    </div>
+
+    <!-- Formulario Crear / Editar Prenda -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs">
+        <h3 id="adminFormTitle" class="font-bold text-base text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+            <i class="fa-solid fa-plus-circle text-brand-600"></i>
+            <span>Agregar Nueva Prenda al Catálogo</span>
+        </h3>
+
+        <input type="hidden" id="editProductId" value="">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+            <div>
+                <label class="block text-slate-700 font-medium mb-1">Nombre de la Prenda *</label>
+                <input type="text" id="adminProdName" placeholder="Ej: Conjunto Encaje Satin" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-slate-700 font-medium mb-1">Categoría *</label>
+                <select id="adminProdCategory" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 focus:bg-white focus:outline-none">
+                    <option value="ropa-interior-dama">👙 Lencería & Íntima Dama</option>
+                    <option value="dama-vestidos">👗 Moda Dama & Vestidos</option>
+                    <option value="caballero-casual">👔 Moda Caballero Casual</option>
+                    <option value="ropa-interior-caballero">🩲 Ropa Interior Caballero</option>
+                    <option value="deportiva-relax">🧘‍♀️ Sport & Pijamas</option>
+                    <option value="combos">🎁 Packs & Gift Boxes</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-slate-700 font-medium mb-1">Precio ($) *</label>
+                <input type="number" step="0.01" id="adminProdPrice" placeholder="25.00" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-slate-700 font-medium mb-1">Etiqueta / Badge</label>
+                <input type="text" id="adminProdBadge" placeholder="Ej: Lo Más Vendido, Oferta" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-slate-700 font-medium mb-1">URL de Imagen</label>
+                <input type="text" id="adminProdImage" placeholder="https://images.unsplash.com/..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div class="md:col-span-3">
+                <label class="block text-slate-700 font-medium mb-1">Tallas / Variantes disponibles (separadas por coma)</label>
+                <input type="text" id="adminProdVariants" placeholder="Talla S / Negro, Talla M / Rojo, Talla L / Blanco" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 focus:bg-white focus:outline-none">
+            </div>
+
+            <div class="md:col-span-3">
+                <label class="block text-slate-700 font-medium mb-1">Descripción y Detalles de la prenda</label>
+                <textarea id="adminProdDesc" rows="2" placeholder="Detalles de tela, copas, tipo de encaje, ajuste..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:ring-1 focus:ring-brand-500 focus:bg-white focus:outline-none resize-none"></textarea>
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 mt-5 border-t border-slate-100 pt-3">
+            <button type="button" id="adminCancelEditBtn" onclick="cancelAdminEdit()" class="hidden px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition">
+                Cancelar Edición
+            </button>
+            <button type="button" onclick="saveProductFromAdmin()" class="px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg shadow transition flex items-center space-x-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span id="adminSaveBtnText">Guardar Prenda</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla de Productos Existentes -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-base text-slate-900">
+                Prendas Registradas (<span id="adminProductCount">0</span>)
+            </h3>
+            
+            <div class="w-64 relative">
+                <input type="text" id="adminSearchInput" onkeyup="renderAdminProductList()" placeholder="Filtrar en lista..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-500">
+                <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-slate-400 text-xs"></i>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 font-semibold">
+                        <th class="p-3">Prenda</th>
+                        <th class="p-3">Categoría</th>
+                        <th class="p-3">Precio</th>
+                        <th class="p-3">Variantes</th>
+                        <th class="p-3 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="adminProductsTableBody" class="divide-y divide-slate-100 bg-white">
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<!-- Modal Diálogo Personalizado -->
+<div id="customDialogModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl text-center space-y-4 transform scale-95 transition-transform duration-200" id="customDialogCard">
+        <div id="customDialogIcon" class="w-12 h-12 rounded-full bg-pink-100 text-brand-600 flex items-center justify-center mx-auto text-xl">
+            <i class="fa-solid fa-circle-info"></i>
+        </div>
+        <div>
+            <h4 id="customDialogTitle" class="font-bold text-slate-900 text-base">Atención</h4>
+            <p id="customDialogMessage" class="text-xs text-slate-600 mt-1 leading-relaxed"></p>
+        </div>
+        <div id="customDialogActions" class="flex justify-center space-x-2 pt-2">
+            <!-- Botones inyectados -->
+        </div>
+    </div>
+</div>
+
+<!-- LÓGICA JAVASCRIPT DEL PANEL -->
+<script>
+    const ADMIN_PASSWORD = "admin123";
+    let productsDatabase = [];
+
+    // Base de Datos Inicial por Defecto
+    const initialProducts = [
+        {
+            id: 1,
+            name: "Conjunto Lencería Velvet Lace Premium",
+            category: "ropa-interior-dama",
+            price: 24.00,
+            badge: "Más Vendido",
+            rating: 4.9,
+            image: "https://images.unsplash.com/photo-1596475638428-2300350d7554?auto=format&fit=crop&w=600&q=80",
+            description: "Conjunto de bralette y panty en encaje francés suave con copas premoldeadas y tirantes ajustables. Excelente soporte y elegancia.",
+            variants: ["S (32B) / Negro", "M (34B) / Vino Tinto", "L (36B) / Blanco Marfil", "XL (38C) / Rojo"]
+        },
+        {
+            id: 2,
+            name: "Vestido Midi Elegance Soft Stretch",
+            category: "dama-vestidos",
+            price: 38.00,
+            badge: "Tendencia",
+            rating: 5.0,
+            image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=600&q=80",
+            description: "Vestido midi drapeado en tela acanalada elastizada. Ideal para eventos casuales o noches especiales. Caída fluida y estilizada.",
+            variants: ["Talla S / Negro", "Talla M / Esmeralda", "Talla L / Terracota"]
+        },
+        {
+            id: 3,
+            name: "Camisa Casual Lino Slim Fit Caballero",
+            category: "caballero-casual",
+            price: 28.50,
+            badge: "Recomendado",
+            rating: 4.8,
+            image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80",
+            description: "Camisa manga larga ligera de lino/algodón de corte Slim Fit. Transpirable, fresca y súper versátil.",
+            variants: ["Talla S / Blanco", "Talla M / Azul Celeste", "Talla L / Beige", "Talla XL / Negro"]
+        },
+        {
+            id: 4,
+            name: "Pack x3 Boxers Seamless Microfibra",
+            category: "ropa-interior-caballero",
+            price: 18.00,
+            badge: "Súper Oferta",
+            rating: 4.9,
+            image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?auto=format&fit=crop&w=600&q=80",
+            description: "Boxers anatómicos sin costuras molestas. Tela elástica ultra suave de secado rápido. Mantiene la frescura todo el día.",
+            variants: ["Talla M (Surtido)", "Talla L (Surtido)", "Talla XL (Surtido)"]
+        },
+        {
+            id: 5,
+            name: "Set Deportivo Seamless High Stretch",
+            category: "deportiva-relax",
+            price: 32.00,
+            badge: "Popular",
+            rating: 4.9,
+            image: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?auto=format&fit=crop&w=600&q=80",
+            description: "Top con soporte de impacto medio y legging de pretina alta moldeadora. Tela anti-transparencia perfecta para entrenamiento o relax.",
+            variants: ["Talla S / Rosa Palo", "Talla M / Gris Jaspe", "Talla L / Negro Matte"]
+        }
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        checkSession();
+    });
+
+    function checkSession() {
+        const logged = sessionStorage.getItem('admin_logged_in');
+        if (logged === 'true') {
+            showDashboard();
+        } else {
+            showLogin();
+        }
+    }
+
+    function handleAdminLogin(e) {
+        e.preventDefault();
+        const pass = document.getElementById('adminPasswordInput').value;
+
+        if (pass === ADMIN_PASSWORD) {
+            sessionStorage.setItem('admin_logged_in', 'true');
+            document.getElementById('loginError').classList.add('hidden');
+            showDashboard();
+            showNotification("Sesión iniciada correctamente");
+        } else {
+            document.getElementById('loginError').classList.remove('hidden');
+        }
+    }
+
+    function handleLogout() {
+        sessionStorage.removeItem('admin_logged_in');
+        showLogin();
+    }
+
+    function showLogin() {
+        document.getElementById('loginSection').classList.remove('hidden');
+        document.getElementById('adminDashboard').classList.add('hidden');
+        document.getElementById('logoutBtn').classList.add('hidden');
+        document.getElementById('logoutBtn').classList.remove('inline-flex');
+    }
+
+    function showDashboard() {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('adminDashboard').classList.remove('hidden');
+        document.getElementById('logoutBtn').classList.remove('hidden');
+        document.getElementById('logoutBtn').classList.add('inline-flex');
+
+        loadProductsFromStorage();
+        renderAdminProductList();
+    }
+
+    function loadProductsFromStorage() {
+        const saved = localStorage.getItem('moda_intima_products');
+        if (saved) {
+            try {
+                productsDatabase = JSON.parse(saved);
+            } catch(e) {
+                productsDatabase = [...initialProducts];
+            }
+        } else {
+            productsDatabase = [...initialProducts];
+            saveProductsToStorage();
+        }
+    }
+
+    function saveProductsToStorage() {
+        localStorage.setItem('moda_intima_products', JSON.stringify(productsDatabase));
+    }
+
+    function renderAdminProductList() {
+        const tbody = document.getElementById('adminProductsTableBody');
+        const searchVal = (document.getElementById('adminSearchInput').value || '').toLowerCase().trim();
+        tbody.innerHTML = '';
+
+        const filtered = productsDatabase.filter(p => 
+            p.name.toLowerCase().includes(searchVal) || 
+            p.category.toLowerCase().includes(searchVal)
+        );
+
+        document.getElementById('adminProductCount').textContent = filtered.length;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="p-6 text-center text-slate-400">
+                        No hay prendas registradas que coincidan con la búsqueda.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        filtered.forEach(p => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-pink-50/40 transition-colors";
+            tr.innerHTML = `
+                <td class="p-3">
+                    <div class="flex items-center space-x-3">
+                        <img src="${p.image}" class="w-10 h-10 object-cover rounded-lg border border-slate-200 shrink-0" onerror="this.src='https://placehold.co/100x100?text=Sin+Foto'">
+                        <div>
+                            <p class="font-semibold text-slate-900 line-clamp-1">${p.name}</p>
+                            <span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">${p.badge || 'Sin etiqueta'}</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="p-3 text-slate-600 uppercase font-medium text-[10px]">
+                    ${p.category.replace(/-/g, ' ')}
+                </td>
+                <td class="p-3 font-bold text-slate-900">
+                    $${parseFloat(p.price).toFixed(2)}
+                </td>
+                <td class="p-3 text-slate-500 max-w-xs truncate">
+                    ${p.variants && p.variants.length > 0 ? p.variants.join(', ') : 'Talla Única'}
+                </td>
+                <td class="p-3 text-center space-x-1">
+                    <button onclick="editProduct(${p.id})" class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg transition" title="Editar">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button onclick="confirmDeleteProduct(${p.id})" class="p-1.5 bg-pink-50 text-pink-600 hover:bg-pink-100 rounded-lg transition" title="Eliminar">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function saveProductFromAdmin() {
+        const editId = document.getElementById('editProductId').value;
+        const name = document.getElementById('adminProdName').value.trim();
+        const category = document.getElementById('adminProdCategory').value;
+        const price = parseFloat(document.getElementById('adminProdPrice').value);
+        const badge = document.getElementById('adminProdBadge').value.trim();
+        const image = document.getElementById('adminProdImage').value.trim();
+        const variantsRaw = document.getElementById('adminProdVariants').value.trim();
+        const description = document.getElementById('adminProdDesc').value.trim();
+
+        if (!name || isNaN(price) || price <= 0) {
+            showCustomAlert("Formulario Incompleto", "Por favor indica el nombre de la prenda y un precio válido.");
+            return;
+        }
+
+        const variantsArr = variantsRaw ? variantsRaw.split(',').map(v => v.trim()).filter(v => v !== '') : ["Talla Única"];
+        const imgFinal = image || "https://images.unsplash.com/photo-1596475638428-2300350d7554?auto=format&fit=crop&w=600&q=80";
+
+        if (editId) {
+            // Modo Edición
+            const idx = productsDatabase.findIndex(p => p.id === parseInt(editId));
+            if (idx > -1) {
+                productsDatabase[idx] = {
+                    ...productsDatabase[idx],
+                    name,
+                    category,
+                    price,
+                    badge: badge || 'Disponible',
+                    image: imgFinal,
+                    variants: variantsArr,
+                    description
+                };
+                showNotification("Prenda actualizada exitosamente");
+            }
+        } else {
+            // Modo Creación
+            const newProd = {
+                id: Date.now(),
+                name,
+                category,
+                price,
+                badge: badge || 'Nuevo',
+                rating: 5.0,
+                image: imgFinal,
+                variants: variantsArr,
+                description
+            };
+            productsDatabase.unshift(newProd);
+            showNotification("Nueva prenda guardada en el catálogo");
+        }
+
+        saveProductsToStorage();
+        cancelAdminEdit();
+        renderAdminProductList();
+    }
+
+    function editProduct(id) {
+        const prod = productsDatabase.find(p => p.id === id);
+        if (!prod) return;
+
+        document.getElementById('editProductId').value = prod.id;
+        document.getElementById('adminProdName').value = prod.name;
+        document.getElementById('adminProdCategory').value = prod.category;
+        document.getElementById('adminProdPrice').value = prod.price;
+        document.getElementById('adminProdBadge').value = prod.badge || '';
+        document.getElementById('adminProdImage').value = prod.image || '';
+        document.getElementById('adminProdVariants').value = prod.variants ? prod.variants.join(', ') : '';
+        document.getElementById('adminProdDesc').value = prod.description || '';
+
+        document.getElementById('adminFormTitle').innerHTML = `
+            <i class="fa-solid fa-pen-to-square text-brand-600"></i>
+            <span>Editando Prenda: "${prod.name}"</span>
+        `;
+        document.getElementById('adminSaveBtnText').textContent = "Actualizar Prenda";
+        document.getElementById('adminCancelEditBtn').classList.remove('hidden');
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelAdminEdit() {
+        document.getElementById('editProductId').value = '';
+        document.getElementById('adminProdName').value = '';
+        document.getElementById('adminProdPrice').value = '';
+        document.getElementById('adminProdBadge').value = '';
+        document.getElementById('adminProdImage').value = '';
+        document.getElementById('adminProdVariants').value = '';
+        document.getElementById('adminProdDesc').value = '';
+
+        document.getElementById('adminFormTitle').innerHTML = `
+            <i class="fa-solid fa-plus-circle text-brand-600"></i>
+            <span>Agregar Nueva Prenda al Catálogo</span>
+        `;
+        document.getElementById('adminSaveBtnText').textContent = "Guardar Prenda";
+        document.getElementById('adminCancelEditBtn').classList.add('hidden');
+    }
+
+    function confirmDeleteProduct(id) {
+        const prod = productsDatabase.find(p => p.id === id);
+        if (!prod) return;
+
+        showCustomConfirm(
+            "¿Eliminar prenda?",
+            `¿Estás seguro de que deseas eliminar "${prod.name}" del catálogo? Esta acción no se puede deshacer.`,
+            () => {
+                productsDatabase = productsDatabase.filter(p => p.id !== id);
+                saveProductsToStorage();
+                renderAdminProductList();
+                showNotification("Prenda eliminada del catálogo");
+            }
+        );
+    }
+
+    function requestResetCatalog() {
+        showCustomConfirm(
+            "Restaurar Datos de Prueba",
+            "¿Deseas restaurar el catálogo a la lista inicial por defecto? Se perderán las prendas creadas manualmente.",
+            () => {
+                productsDatabase = [...initialProducts];
+                saveProductsToStorage();
+                renderAdminProductList();
+                cancelAdminEdit();
+                showNotification("Catálogo restaurado al estado inicial");
+            }
+        );
+    }
+
+    function showCustomAlert(title, message) {
+        const modal = document.getElementById('customDialogModal');
+        const card = document.getElementById('customDialogCard');
+        document.getElementById('customDialogTitle').textContent = title;
+        document.getElementById('customDialogMessage').textContent = message;
+        
+        document.getElementById('customDialogActions').innerHTML = `
+            <button onclick="closeCustomDialog()" class="px-5 py-2 bg-brand-600 text-white font-bold text-xs rounded-xl shadow hover:bg-brand-700 transition">Entendido</button>
+        `;
+
+        modal.classList.remove('pointer-events-none', 'opacity-0');
+        modal.classList.add('opacity-100');
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+    }
+
+    function showCustomConfirm(title, message, onConfirm) {
+        const modal = document.getElementById('customDialogModal');
+        const card = document.getElementById('customDialogCard');
+        document.getElementById('customDialogTitle').textContent = title;
+        document.getElementById('customDialogMessage').textContent = message;
+
+        document.getElementById('customDialogActions').innerHTML = `
+            <button onclick="closeCustomDialog()" class="px-4 py-2 bg-slate-100 text-slate-700 font-semibold text-xs rounded-xl hover:bg-slate-200 transition">Cancelar</button>
+            <button id="modalConfirmBtn" class="px-4 py-2 bg-brand-600 text-white font-bold text-xs rounded-xl shadow hover:bg-brand-700 transition">Confirmar</button>
+        `;
+
+        document.getElementById('modalConfirmBtn').onclick = () => {
+            closeCustomDialog();
+            onConfirm();
+        };
+
+        modal.classList.remove('pointer-events-none', 'opacity-0');
+        modal.classList.add('opacity-100');
+        card.classList.remove('scale-95');
+        card.classList.add('scale-100');
+    }
+
+    function closeCustomDialog() {
+        const modal = document.getElementById('customDialogModal');
+        const card = document.getElementById('customDialogCard');
+        modal.classList.add('pointer-events-none');
+        modal.classList.remove('opacity-100');
+        modal.classList.add('opacity-0');
+        card.classList.remove('scale-100');
+        card.classList.add('scale-95');
+    }
+
+    function showNotification(msg) {
+        const toast = document.createElement('div');
+        toast.className = "fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center space-x-2 transition-all duration-300 transform translate-y-10 opacity-0";
+        toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i> <span>${msg}</span>`;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.classList.remove('translate-y-10', 'opacity-0');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.add('translate-y-10', 'opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+</script>
